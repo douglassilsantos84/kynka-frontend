@@ -15,6 +15,7 @@ import ChatMessage from "./components/ChatMessage";
 import Dashboard from "./components/Dashboard";
 import InventoryPanel from "./components/InventoryPanel";
 import ProjectsPanel from "./components/ProjectsPanel";
+import SuppliersPanel from "./components/SuppliersPanel";
 import StatusBadge from "./components/StatusBadge";
 
 
@@ -48,6 +49,11 @@ const navigation = [
     id: "projects",
     label: "Projetos",
     icon: "PR",
+  },
+  {
+    id: "suppliers",
+    label: "Fornecedores",
+    icon: "FN",
   },
 ];
 
@@ -452,6 +458,15 @@ export default function App() {
             <ProjectsPanel />
           )}
 
+
+          {/* =================================================
+              FORNECEDORES
+              ================================================= */}
+
+          {activePage === "suppliers" && (
+            <SuppliersPanel />
+          )}
+
         </main>
       </div>
     </div>
@@ -465,6 +480,7 @@ function getPageTitle(page) {
     chat: "Chat",
     inventory: "Estoque",
     projects: "Projetos",
+    suppliers: "Fornecedores",
   };
 
   return titles[page] ?? "Kynka";

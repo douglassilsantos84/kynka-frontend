@@ -360,10 +360,10 @@ export function getConsolidatedPurchaseList(demandIds=null){ return jsonRequest(
 // Purchase Orders / Receiving
 // ============================================================
 
-export function createPurchaseOrder(demandIds = null, notes = "") {
+export function createPurchaseOrder(demandIds = null, notes = "", supplierId = null) {
   return jsonRequest("/procurement/orders", {
     method: "POST",
-    body: JSON.stringify({ demand_ids: demandIds, notes }),
+    body: JSON.stringify({ demand_ids: demandIds, notes, supplier_id: supplierId }),
   });
 }
 
@@ -387,5 +387,62 @@ export function receivePurchaseOrderItem(orderId, itemId, quantity) {
   return jsonRequest(`/procurement/orders/${orderId}/items/${itemId}/receive`, {
     method: "POST",
     body: JSON.stringify({ quantity: Number(quantity) }),
+  });
+}
+
+
+// ============================================================
+// Suppliers / Pricing Intelligence
+// ============================================================
+
+export function getSuppliers(activeOnly = false) {
+  return jsonRequest(`/suppliers?active_only=${activeOnly ? "true" : "false"}`);
+}
+
+export function createSupplier(data) {
+  return jsonRequest("/suppliers", { method: "POST", body: JSON.stringify(data) });
+}
+
+export function updateSupplier(supplierId, data) {
+  return jsonRequest(`/suppliers/${supplierId}`, { method: "PUT", body: JSON.stringify(data) });
+}
+
+export function setSupplierActive(supplierId, active) {
+  return jsonRequest(`/suppliers/${supplierId}/status`, {
+    method: "PUT",
+    body: JSON.stringify({ active: Boolean(active) }),
+  });
+}
+
+export function getSupplierMaterials(supplierId) {
+  return jsonRequest(`/suppliers/${supplierId}/materials`);
+}
+
+export function upsertSupplierMaterial(supplierId, data) {
+  return jsonRequest(`/suppliers/${supplierId}/materials`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteSupplierMaterial(supplierId, materialCode) {
+  return jsonRequest(`/suppliers/${supplierId}/materials/${encodeURIComponent(materialCode)}`, {
+    method: "DELETE",
+  });
+}
+
+export function getSupplierMaterialHistory(supplierId, materialCode) {
+  return jsonRequest(`/suppliers/${supplierId}/materials/${encodeURIComponent(materialCode)}/history`);
+}
+
+export function getMaterialSupplierQuotes(materialCode, quantity = 1) {
+  const params = new URLSearchParams({ quantity: String(quantity) });
+  return jsonRequest(`/supplier-quotes/materials/${encodeURIComponent(materialCode)}?${params.toString()}`);
+}
+
+export function getPurchaseQuotes(demandIds = null) {
+  return jsonRequest("/procurement/quotes", {
+    method: "POST",
+    body: JSON.stringify({ demand_ids: demandIds }),
   });
 }

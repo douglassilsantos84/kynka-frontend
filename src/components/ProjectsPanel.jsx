@@ -16,6 +16,7 @@ import {
   getConsolidatedPurchaseList,
   createPurchaseOrder,
   getPurchaseOrders,
+  getPurchaseQuotes,
   markPurchaseOrderOrdered,
   cancelPurchaseOrder,
   receivePurchaseOrderItem,
@@ -60,6 +61,7 @@ export default function ProjectsPanel() {
   const [purchaseOrders, setPurchaseOrders] = useState([]);
   const [showPurchaseOrders, setShowPurchaseOrders] = useState(false);
   const [receivingItem, setReceivingItem] = useState(null);
+  const [purchaseQuoteModal, setPurchaseQuoteModal] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] =
@@ -469,7 +471,27 @@ export default function ProjectsPanel() {
     setError("");
     setSuccess("");
     try {
-      const order = await createPurchaseOrder(demandIds);
+      const quotes = await getPurchaseQuotes(demandIds);
+      setPurchaseQuoteModal({ demandIds, quotes });
+    } catch (requestError) {
+      setError(getErrorMessage(requestError));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleConfirmPurchaseOrder(supplierId) {
+    if (!purchaseQuoteModal) return;
+    setSaving(true);
+    setError("");
+    setSuccess("");
+    try {
+      const order = await createPurchaseOrder(
+        purchaseQuoteModal.demandIds,
+        "",
+        supplierId
+      );
+      setPurchaseQuoteModal(null);
       setSuccess(`Pedido de compra #${order.id} criado com sucesso.`);
       const orders = await getPurchaseOrders();
       setPurchaseOrders(orders);
@@ -536,6 +558,9 @@ export default function ProjectsPanel() {
         plan={plan}
         purchaseList={purchaseList}
         onCreatePurchaseOrder={() => handleCreatePurchaseOrder([selectedProject.id])}
+        purchaseQuoteModal={purchaseQuoteModal}
+        onConfirmPurchaseOrder={handleConfirmPurchaseOrder}
+        onClosePurchaseQuote={() => setPurchaseQuoteModal(null)}
         loading={detailLoading}
         saving={saving}
         importing={importing}
@@ -754,6 +779,9 @@ function ProjectDetail({
   plan,
   purchaseList,
   onCreatePurchaseOrder,
+  purchaseQuoteModal,
+  onConfirmPurchaseOrder,
+  onClosePurchaseQuote,
   loading,
   saving,
   importing,
@@ -916,6 +944,15 @@ function ProjectDetail({
           <PlanningTable plan={plan} />
           <PurchaseListPanel purchaseList={purchaseList} onCreateOrder={onCreatePurchaseOrder} />
         </>
+      )}
+
+      {purchaseQuoteModal && (
+        <PurchaseQuoteModal
+          data={purchaseQuoteModal}
+          saving={saving}
+          onConfirm={onConfirmPurchaseOrder}
+          onClose={onClosePurchaseQuote}
+        />
       )}
 
       {showRequirementModal && (
@@ -1794,6 +1831,82 @@ function MissingMaterialModal({
 }
 
 
+function PurchaseQuoteModal({ data, saving, onConfirm, onClose }) {
+  const { quotes } = data;
+  const fullOptions = (quotes.options ?? []).filter((option) => option.full_coverage);
+
+  return (
+    <div className="inventory-modal-backdrop">
+      <div className="inventory-modal procurement-modal">
+        <div className="inventory-modal-header">
+          <div>
+            <span className="page-eyebrow">Inteligência de compras</span>
+            <h3>Escolher fornecedor</h3>
+          </div>
+          <button type="button" onClick={onClose}>×</button>
+        </div>
+
+        <div className="procurement-modal-content">
+          <div className="purchase-quote-analysis">{quotes.analysis}</div>
+
+          {fullOptions.length === 0 ? (
+            <div className="projects-empty compact">
+              Nenhum fornecedor cadastrado cobre todos os materiais desta compra.
+              Cadastre preços na área Fornecedores ou crie o pedido sem fornecedor.
+            </div>
+          ) : (
+            fullOptions.map((option) => (
+              <div
+                className={`purchase-quote-card ${option.supplier_id === quotes.best_supplier_id ? "recommended" : ""}`}
+                key={option.supplier_id}
+              >
+                <div className="purchase-quote-header">
+                  <div>
+                    <strong>{option.supplier_name}</strong>
+                    <span>{option.supplier_code} · prazo máximo {option.max_lead_time_days} dia(s)</span>
+                  </div>
+                  <div className="purchase-quote-total">
+                    <strong>{money(option.total_estimated)}</strong>
+                    <span>{option.supplier_id === quotes.best_supplier_id ? "Recomendado pela Kynka" : "Total estimado"}</span>
+                  </div>
+                </div>
+                <div className="project-table-wrapper">
+                  <table className="project-table">
+                    <thead><tr><th>Material</th><th>Necessário</th><th>Pedido</th><th>Preço</th><th>Total</th></tr></thead>
+                    <tbody>
+                      {option.items.map((item) => (
+                        <tr key={item.material_code}>
+                          <td><strong>{item.material_name}</strong><span className="project-material-code">{item.material_code}</span></td>
+                          <td>{quantity(item.requested_quantity, item.unit)}</td>
+                          <td>{quantity(item.order_quantity, item.unit)}</td>
+                          <td>{money(item.unit_price)}</td>
+                          <td>{money(item.total_price)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="quote-modal-actions">
+                  <button type="button" className="primary-button" disabled={saving} onClick={() => onConfirm(option.supplier_id)}>
+                    Criar pedido com este fornecedor
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+
+          <div className="quote-modal-actions">
+            <button type="button" className="secondary-button" onClick={onClose} disabled={saving}>Cancelar</button>
+            <button type="button" className="secondary-button" onClick={() => onConfirm(null)} disabled={saving}>
+              Criar sem fornecedor
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PurchaseOrdersModal({
   orders,
   saving,
@@ -1966,6 +2079,18 @@ function PurchaseOrderCard({
             {order.demand_codes.join(", ") ||
               "Consolidado"}
           </span>
+
+          <span className="purchase-order-supplier">
+            {order.supplier_name
+              ? `Fornecedor: ${order.supplier_name}`
+              : "Fornecedor não definido"}
+          </span>
+
+          {Number(order.total_estimated || 0) > 0 && (
+            <span className="purchase-order-total">
+              Estimado: {money(order.total_estimated)}
+            </span>
+          )}
         </div>
 
         <span
@@ -2052,6 +2177,8 @@ function PurchaseOrderItemsTable({
             <th>Material</th>
             <th>Pedido</th>
             <th>Recebido</th>
+            <th>Preço</th>
+            <th>Total</th>
             <th>
               {isCancelled
                 ? "Não recebido"
@@ -2086,6 +2213,18 @@ function PurchaseOrderItemsTable({
                   item.quantity_received,
                   item.unit
                 )}
+              </td>
+
+              <td>
+                {Number(item.unit_price || 0) > 0
+                  ? money(item.unit_price)
+                  : "—"}
+              </td>
+
+              <td>
+                {Number(item.total_price || 0) > 0
+                  ? money(item.total_price)
+                  : "—"}
               </td>
 
               <td>
@@ -2210,5 +2349,16 @@ function formatNumber(value) {
 
 function quantity(value, unit) {
   return `${formatNumber(value)} ${unit}`;
+}
+
+
+function money(value) {
+  return Number(value || 0).toLocaleString(
+    "pt-PT",
+    {
+      style: "currency",
+      currency: "EUR",
+    }
+  );
 }
 
