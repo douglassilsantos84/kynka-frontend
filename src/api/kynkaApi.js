@@ -453,3 +453,13 @@ export function getQuoteImports(){return jsonRequest("/quote-imports")}
 export function matchQuoteImportItem(importId,itemId,materialCode){return jsonRequest(`/quote-imports/${importId}/items/${itemId}/match`,{method:"PUT",body:JSON.stringify({material_code:materialCode})})}
 export function approveQuoteImport(importId){return jsonRequest(`/quote-imports/${importId}/approve`,{method:"POST"})}
 
+// ETAPA 21B - Email quote automation
+export function getEmailQuoteStatus() {
+  return jsonRequest("/email-quotes/status");
+}
+export function getEmailQuoteMessages() {
+  return jsonRequest("/email-quotes/messages");
+}
+export function scanEmailQuotes() {
+  return jsonRequest("/email-quotes/scan", { method: "POST" });
+}
