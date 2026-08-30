@@ -1,4 +1,4 @@
-﻿import {
+import {
   useEffect,
   useRef,
   useState,
@@ -15,6 +15,7 @@ import ChatMessage from "./components/ChatMessage";
 import Dashboard from "./components/Dashboard";
 import InventoryPanel from "./components/InventoryPanel";
 import ProjectsPanel from "./components/ProjectsPanel";
+import QuoteImportsPanel from "./components/QuoteImportsPanel";
 import SuppliersPanel from "./components/SuppliersPanel";
 import StatusBadge from "./components/StatusBadge";
 
@@ -49,6 +50,11 @@ const navigation = [
     id: "projects",
     label: "Projetos",
     icon: "PR",
+  },
+  {
+    id: "quotes",
+    label: "Cotações",
+    icon: "CT",
   },
   {
     id: "suppliers",
@@ -466,6 +472,9 @@ export default function App() {
           {activePage === "suppliers" && (
             <SuppliersPanel />
           )}
+          {activePage === "quotes" && (
+            <QuoteImportsPanel />
+          )}
 
         </main>
       </div>
@@ -481,6 +490,7 @@ function getPageTitle(page) {
     inventory: "Estoque",
     projects: "Projetos",
     suppliers: "Fornecedores",
+    quotes: "Cotações",
   };
 
   return titles[page] ?? "Kynka";

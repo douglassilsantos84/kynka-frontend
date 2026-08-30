@@ -446,3 +446,10 @@ export function getPurchaseQuotes(demandIds = null) {
     body: JSON.stringify({ demand_ids: demandIds }),
   });
 }
+
+// ETAPA 21 - Quote imports
+export async function previewQuoteImport(file,supplierId=null){const form=new FormData();form.append("file",file);if(supplierId!==null)form.append("supplier_id",String(supplierId));const response=await fetch(`${API_URL}/quote-imports/preview`,{method:"POST",body:form});if(!response.ok){let d=`Erro HTTP ${response.status}`;try{const x=await response.json();d=x.detail||d}catch{}throw new Error(d)}return response.json()}
+export function getQuoteImports(){return jsonRequest("/quote-imports")}
+export function matchQuoteImportItem(importId,itemId,materialCode){return jsonRequest(`/quote-imports/${importId}/items/${itemId}/match`,{method:"PUT",body:JSON.stringify({material_code:materialCode})})}
+export function approveQuoteImport(importId){return jsonRequest(`/quote-imports/${importId}/approve`,{method:"POST"})}
+
