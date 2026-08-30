@@ -13,6 +13,7 @@ import {
 
 import ChatMessage from "./components/ChatMessage";
 import Dashboard from "./components/Dashboard";
+import DocumentsPanel from "./components/DocumentsPanel";
 import InventoryPanel from "./components/InventoryPanel";
 import ProjectsPanel from "./components/ProjectsPanel";
 import QuoteImportsPanel from "./components/QuoteImportsPanel";
@@ -60,6 +61,11 @@ const navigation = [
     id: "suppliers",
     label: "Fornecedores",
     icon: "FN",
+  },
+  {
+    id: "documents",
+    label: "Documentos",
+    icon: "DC",
   },
 ];
 
@@ -267,7 +273,6 @@ export default function App() {
 
         <div className="future-modules">
           <div>Financeiro</div>
-          <div>Documentos</div>
           <div>Clientes</div>
           <div>Integrações</div>
         </div>
@@ -476,6 +481,10 @@ export default function App() {
             <QuoteImportsPanel />
           )}
 
+          {activePage === "documents" && (
+            <DocumentsPanel />
+          )}
+
         </main>
       </div>
     </div>
@@ -491,6 +500,7 @@ function getPageTitle(page) {
     projects: "Projetos",
     suppliers: "Fornecedores",
     quotes: "Cotações",
+    documents: "Documentos",
   };
 
   return titles[page] ?? "Kynka";

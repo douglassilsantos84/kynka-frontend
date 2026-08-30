@@ -463,3 +463,23 @@ export function getEmailQuoteMessages() {
 export function scanEmailQuotes() {
   return jsonRequest("/email-quotes/scan", { method: "POST" });
 }
+
+// ETAPA 22 - Documents & RAG
+export function getDocuments({category=null,search=null,limit=100}={}) {
+  const p=new URLSearchParams({limit:String(limit)});
+  if(category)p.set("category",category); if(search)p.set("search",search);
+  return jsonRequest(`/documents?${p.toString()}`);
+}
+export function getDocumentStats(){return jsonRequest("/documents/stats")}
+export function getDocument(id){return jsonRequest(`/documents/${id}`)}
+export async function uploadDocument(file,{title=null,category=null}={}) {
+  const form=new FormData(); form.append("file",file);
+  if(title)form.append("title",title); if(category)form.append("category",category);
+  const response=await fetch(`${API_URL}/documents/upload`,{method:"POST",body:form});
+  if(!response.ok){let m=`Erro HTTP ${response.status}`;try{const d=await response.json();m=d.detail||m}catch{}throw new Error(m)}
+  return response.json();
+}
+export function searchDocuments(query,documentIds=null,limit=8){return jsonRequest("/documents/search",{method:"POST",body:JSON.stringify({query,document_ids:documentIds,limit})})}
+export function askDocuments(question,documentIds=null,limit=6){return jsonRequest("/documents/ask",{method:"POST",body:JSON.stringify({question,document_ids:documentIds,limit})})}
+export function reindexDocument(id){return jsonRequest(`/documents/${id}/reindex`,{method:"POST"})}
+export function deleteDocument(id){return jsonRequest(`/documents/${id}`,{method:"DELETE"})}
