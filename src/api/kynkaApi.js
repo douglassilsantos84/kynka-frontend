@@ -483,3 +483,12 @@ export function searchDocuments(query,documentIds=null,limit=8){return jsonReque
 export function askDocuments(question,documentIds=null,limit=6){return jsonRequest("/documents/ask",{method:"POST",body:JSON.stringify({question,document_ids:documentIds,limit})})}
 export function reindexDocument(id){return jsonRequest(`/documents/${id}/reindex`,{method:"POST"})}
 export function deleteDocument(id){return jsonRequest(`/documents/${id}`,{method:"DELETE"})}
+
+// Etapa 23 - Material Requests
+export function getMaterialRequests(status=null,demandId=null){const p=new URLSearchParams();if(status)p.set('status',status);if(demandId)p.set('demand_id',demandId);const q=p.toString();return jsonRequest(`/material-requests${q?`?${q}`:''}`)}
+export function getMaterialRequestSummary(){return jsonRequest('/material-requests/summary')}
+export function createMaterialRequest(payload){return jsonRequest('/material-requests',{method:'POST',body:JSON.stringify(payload)})}
+export function transitionMaterialRequest(id,status,actor='',notes=''){return jsonRequest(`/material-requests/${id}/transition`,{method:'POST',body:JSON.stringify({status,actor,notes})})}
+export function separateMaterialRequest(id,actor='',notes=''){return jsonRequest(`/material-requests/${id}/separate`,{method:'POST',body:JSON.stringify({actor,notes})})}
+export function deliverMaterialRequest(id,actor='',notes=''){return jsonRequest(`/material-requests/${id}/deliver`,{method:'POST',body:JSON.stringify({actor,notes})})}
+

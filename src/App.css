@@ -2633,3 +2633,59 @@ input {
     flex-direction: column;
   }
 }
+
+/* ETAPA 23 MATERIAL REQUESTS */
+.material-requests-page{width:100%}.material-requests-header h2{margin:5px 0}.material-requests-header p{color:#858d99}.mr-alert,.mr-card,.mr-stats>div{border:1px solid #282d36;border-radius:12px;background:#15181d}.mr-alert{padding:12px;margin:12px 0}.mr-alert.error{background:#2a1719}.mr-alert.success{background:#14241b}.mr-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}.mr-stats>div{padding:14px}.mr-stats strong{display:block;font-size:24px}.mr-stats span,.mr-meta{color:#858d99;font-size:12px}.mr-layout{display:grid;grid-template-columns:420px 1fr;gap:16px}.mr-card{padding:17px}.mr-form{display:flex;flex-direction:column;gap:12px}.mr-form label{display:flex;flex-direction:column;gap:6px;color:#aeb4bd;font-size:12px}.mr-form input,.mr-form select,.mr-form textarea,.mr-card select{background:#0f1115;color:#eef0f3;border:1px solid #303641;border-radius:8px;padding:10px}.mr-row,.mr-item{display:grid;grid-template-columns:1fr 130px;gap:8px}.mr-item{grid-template-columns:1fr 85px 34px;margin:7px 0}.mr-item button{background:#2a1b1d;color:#e9a4aa;border:0;border-radius:7px}.mr-list-head,.mr-request-top,.mr-actions{display:flex;justify-content:space-between;gap:8px}.mr-list{display:flex;flex-direction:column;gap:10px;margin-top:12px}.mr-request{padding:13px;border:1px solid #2a3039;border-radius:10px;background:#111419}.mr-request-top>div{display:flex;flex-direction:column}.mr-status{padding:5px 8px;border-radius:999px;background:#252b34;font-size:12px}.mr-status.ready{background:#173122}.mr-status.shortage{background:#35281a}.mr-meta{display:flex;gap:15px;margin:9px 0}.mr-request-items{border-block:1px solid #252a31;padding:7px 0}.mr-request-items>div{display:flex;justify-content:space-between;padding:4px 0}.mr-actions{justify-content:flex-start;margin-top:10px;flex-wrap:wrap}.mr-actions button{background:#232831;color:#eef0f3;border:1px solid #343a45;border-radius:7px;padding:7px 10px}.mr-actions .danger{background:#29191b;color:#e8a3a8}@media(max-width:980px){.mr-layout{grid-template-columns:1fr}.mr-stats{grid-template-columns:repeat(2,1fr)}}
+
+
+/* ==========================================================
+   ETAPA 23 - MATERIAL REQUESTS - LAYOUT FIX
+   ========================================================== */
+
+.mr-layout {
+  min-width: 0;
+}
+
+.mr-card {
+  min-width: 0;
+}
+
+.mr-form {
+  min-width: 0;
+}
+
+.mr-item {
+  grid-template-columns: minmax(0, 1fr) 85px 34px;
+  width: 100%;
+  min-width: 0;
+}
+
+.mr-item select,
+.mr-item input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.mr-row {
+  grid-template-columns: minmax(0, 1fr) 130px;
+  min-width: 0;
+}
+
+.mr-row > * {
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .mr-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .mr-row {
+    grid-template-columns: 1fr;
+  }
+
+  .mr-item {
+    grid-template-columns: minmax(0, 1fr) 75px 34px;
+  }
+}

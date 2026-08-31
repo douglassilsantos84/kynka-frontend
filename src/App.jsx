@@ -14,6 +14,7 @@ import {
 import ChatMessage from "./components/ChatMessage";
 import Dashboard from "./components/Dashboard";
 import DocumentsPanel from "./components/DocumentsPanel";
+import MaterialRequestsPanel from "./components/MaterialRequestsPanel";
 import InventoryPanel from "./components/InventoryPanel";
 import ProjectsPanel from "./components/ProjectsPanel";
 import QuoteImportsPanel from "./components/QuoteImportsPanel";
@@ -67,6 +68,7 @@ const navigation = [
     label: "Documentos",
     icon: "DC",
   },
+  { id: "material-requests", label: "Solicitacoes", icon: "SM" },
 ];
 
 
@@ -485,6 +487,8 @@ export default function App() {
             <DocumentsPanel />
           )}
 
+          {activePage === "material-requests" && (<MaterialRequestsPanel />)}
+
         </main>
       </div>
     </div>
@@ -494,6 +498,7 @@ export default function App() {
 
 function getPageTitle(page) {
   const titles = {
+    "material-requests": "Solicitacoes de Material",
     dashboard: "Dashboard",
     chat: "Chat",
     inventory: "Estoque",
