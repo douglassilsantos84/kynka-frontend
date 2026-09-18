@@ -1,11 +1,18 @@
 const API_URL = "http://127.0.0.1:8000/api/v1";
 
+const AUTH_KEY = "kynka_access_token";
+export function getAuthToken(){return localStorage.getItem(AUTH_KEY)||""}
+export function setAuthToken(token){if(token)localStorage.setItem(AUTH_KEY,token);else localStorage.removeItem(AUTH_KEY)}
+function authHeaders(){const token=getAuthToken();return token?{Authorization:`Bearer ${token}`}:{}}
+
+
 
 async function jsonRequest(path, options = {}) {
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...authHeaders(),
       ...options.headers,
     },
   });
@@ -193,6 +200,7 @@ export async function importInventory(file) {
     `${API_URL}/inventory/import`,
     {
       method: "POST",
+      headers: authHeaders(),
       body: formData,
     }
   );
@@ -304,6 +312,7 @@ export async function importDemandQuantityMap(
     `${API_URL}/demands/${demandId}/quantity-map/import`,
     {
       method: "POST",
+      headers: authHeaders(),
       body: formData,
     }
   );
@@ -448,7 +457,7 @@ export function getPurchaseQuotes(demandIds = null) {
 }
 
 // ETAPA 21 - Quote imports
-export async function previewQuoteImport(file,supplierId=null){const form=new FormData();form.append("file",file);if(supplierId!==null)form.append("supplier_id",String(supplierId));const response=await fetch(`${API_URL}/quote-imports/preview`,{method:"POST",body:form});if(!response.ok){let d=`Erro HTTP ${response.status}`;try{const x=await response.json();d=x.detail||d}catch{}throw new Error(d)}return response.json()}
+export async function previewQuoteImport(file,supplierId=null){const form=new FormData();form.append("file",file);if(supplierId!==null)form.append("supplier_id",String(supplierId));const response=await fetch(`${API_URL}/quote-imports/preview`,{method:"POST",headers:authHeaders(),body:form});if(!response.ok){let d=`Erro HTTP ${response.status}`;try{const x=await response.json();d=x.detail||d}catch{}throw new Error(d)}return response.json()}
 export function getQuoteImports(){return jsonRequest("/quote-imports")}
 export function matchQuoteImportItem(importId,itemId,materialCode){return jsonRequest(`/quote-imports/${importId}/items/${itemId}/match`,{method:"PUT",body:JSON.stringify({material_code:materialCode})})}
 export function approveQuoteImport(importId){return jsonRequest(`/quote-imports/${importId}/approve`,{method:"POST"})}
@@ -475,7 +484,7 @@ export function getDocument(id){return jsonRequest(`/documents/${id}`)}
 export async function uploadDocument(file,{title=null,category=null}={}) {
   const form=new FormData(); form.append("file",file);
   if(title)form.append("title",title); if(category)form.append("category",category);
-  const response=await fetch(`${API_URL}/documents/upload`,{method:"POST",body:form});
+  const response=await fetch(`${API_URL}/documents/upload`,{method:"POST",headers:authHeaders(),body:form});
   if(!response.ok){let m=`Erro HTTP ${response.status}`;try{const d=await response.json();m=d.detail||m}catch{}throw new Error(m)}
   return response.json();
 }
@@ -492,3 +501,16 @@ export function transitionMaterialRequest(id,status,actor='',notes=''){return js
 export function separateMaterialRequest(id,actor='',notes=''){return jsonRequest(`/material-requests/${id}/separate`,{method:'POST',body:JSON.stringify({actor,notes})})}
 export function deliverMaterialRequest(id,actor='',notes=''){return jsonRequest(`/material-requests/${id}/deliver`,{method:'POST',body:JSON.stringify({actor,notes})})}
 
+
+
+// Etapas 24-26 - Security
+export function getBootstrapStatus(){return jsonRequest("/auth/bootstrap-status")}
+export function bootstrapAdmin(data){return jsonRequest("/auth/bootstrap",{method:"POST",body:JSON.stringify(data)})}
+export function login(email,password){return jsonRequest("/auth/login",{method:"POST",body:JSON.stringify({email,password})})}
+export function getMe(){return jsonRequest("/auth/me")}
+export async function logout(){try{await jsonRequest("/auth/logout",{method:"POST"})}finally{setAuthToken("")}}
+export function getSecurityUsers(){return jsonRequest("/security/users")}
+export function createSecurityUser(data){return jsonRequest("/security/users",{method:"POST",body:JSON.stringify(data)})}
+export function patchSecurityUser(id,data){return jsonRequest(`/security/users/${id}`,{method:"PATCH",body:JSON.stringify(data)})}
+export function getEvents(limit=100){return jsonRequest(`/events?limit=${limit}`)}
+export function getNotifications(limit=100){return jsonRequest(`/notifications?limit=${limit}`)}

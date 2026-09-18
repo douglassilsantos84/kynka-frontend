@@ -20,6 +20,8 @@ import ProjectsPanel from "./components/ProjectsPanel";
 import QuoteImportsPanel from "./components/QuoteImportsPanel";
 import SuppliersPanel from "./components/SuppliersPanel";
 import StatusBadge from "./components/StatusBadge";
+import AuthGate from "./components/AuthGate";
+import SecurityPanel from "./components/SecurityPanel";
 
 
 const initialMessages = [
@@ -69,10 +71,11 @@ const navigation = [
     icon: "DC",
   },
   { id: "material-requests", label: "Solicitacoes", icon: "SM" },
+  { id: "security", label: "Seguranca", icon: "SG" },
 ];
 
 
-export default function App() {
+function PlatformApp() {
   const [activePage, setActivePage] =
     useState("dashboard");
 
@@ -488,6 +491,7 @@ export default function App() {
           )}
 
           {activePage === "material-requests" && (<MaterialRequestsPanel />)}
+          {activePage === "security" && (<SecurityPanel />)}
 
         </main>
       </div>
@@ -499,6 +503,7 @@ export default function App() {
 function getPageTitle(page) {
   const titles = {
     "material-requests": "Solicitacoes de Material",
+    security: "Seguranca & Equipa",
     dashboard: "Dashboard",
     chat: "Chat",
     inventory: "Estoque",
@@ -510,3 +515,4 @@ function getPageTitle(page) {
 
   return titles[page] ?? "Kynka";
 }
+export default function App(){return <AuthGate><PlatformApp /></AuthGate>}
